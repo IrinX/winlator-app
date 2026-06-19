@@ -90,7 +90,12 @@ void initVulkanInstance(VkContext* context, VkInstance instance, const VkApplica
     context->hasExternalMemoryDMABuf = isExternalMemoryHandleTypeSupported(physicalDevices[0], VK_EXTERNAL_MEMORY_HANDLE_TYPE_DMA_BUF_BIT_EXT);
 
     MEMFREE(context->engineName);
-    context->engineName = applicationInfo && applicationInfo->pEngineName ? strdup(applicationInfo->pEngineName) : NULL;
+    context->engineVersion = 0;
+
+    if (applicationInfo) {
+        context->engineName = applicationInfo->pEngineName ? strdup(applicationInfo->pEngineName) : NULL;
+        context->engineVersion = applicationInfo->engineVersion;
+    }
 
     setupExposedDeviceExtensions(context);
 
