@@ -380,6 +380,15 @@ static void internalReadVertexArrayElement(GLContext* context, int arrayIdx, int
             memcpy(dstValues, srcValues, vertexAttrib->size * sizeof(float));
             break;
         }
+        case GL_HALF_FLOAT: {
+            const GLhalf* values = srcValues; \
+            _Float16 value;
+            for (int i = 0; i < vertexAttrib->size; i++) {
+                memcpy(&value, &values[i], sizeof(value));
+                dstValues[i] = (float)value;
+            }
+            break;
+        }
         case GL_BYTE: {
             PARSE_VALUESF(GLbyte, INT8_MAX);
             break;

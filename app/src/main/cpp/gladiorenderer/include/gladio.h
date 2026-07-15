@@ -248,6 +248,8 @@ static inline int sizeofGLType(GLenum type) {
         case GL_INT:
         case GL_UNSIGNED_INT:
             return sizeof(GLint);
+        case GL_HALF_FLOAT:
+            return sizeof(GLhalf);
         case GL_FLOAT:
             return sizeof(GLfloat);
         case GL_DOUBLE:
