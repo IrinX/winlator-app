@@ -1034,7 +1034,9 @@ void gd_handle_glFenceSync(GLContext* context) {
 }
 
 void gd_handle_glFinish(GLContext* context) {
+#ifndef SKIP_GL_FINISH
     glFinish();
+#endif
 
     gl_send(context->clientRing, REQUEST_CODE_GL_FINISH, NULL, 0);
 }
@@ -2141,7 +2143,16 @@ void gd_handle_glPixelStorei(GLContext* context) {
     GLenum pname = ArrayBuffer_getInt(&context->inputBuffer);
     GLint param = ArrayBuffer_getInt(&context->inputBuffer);
 
-    if (pname != GL_PACK_ALIGNMENT && pname != GL_UNPACK_ALIGNMENT) glPixelStorei(pname, param);
+    if (pname == GL_PACK_ROW_LENGTH ||
+        pname == GL_PACK_SKIP_PIXELS ||
+        pname == GL_PACK_SKIP_ROWS ||
+        pname == GL_UNPACK_ROW_LENGTH ||
+        pname == GL_UNPACK_IMAGE_HEIGHT ||
+        pname == GL_UNPACK_SKIP_PIXELS ||
+        pname == GL_UNPACK_SKIP_ROWS ||
+        pname == GL_UNPACK_SKIP_IMAGES) {
+        glPixelStorei(pname, param);
+    }
 }
 
 void gd_handle_glPixelTransferf(GLContext* context) {
