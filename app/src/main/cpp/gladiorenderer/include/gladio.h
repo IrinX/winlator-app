@@ -31,7 +31,9 @@
 #define MAX_BUFFER_TARGETS 6
 #define MAX_ARB_PROGRAM_TARGETS 2
 #define MAX_FB_COLOR_ATTACHMENTS 8
-#define VERTEX_ATTRIB_COUNT (3 + MAX_TEXCOORDS)
+#define MIN_VERTEX_ATTRIBS 3
+#define MAX_GENERIC_VERTEX_ATTRIBS 8
+#define VERTEX_ATTRIB_COUNT (MIN_VERTEX_ATTRIBS + MAX_TEXCOORDS + MAX_GENERIC_VERTEX_ATTRIBS)
 
 #define GL_SEND_CHECKED(requestCode, outputBuffer, bufferSize, ...) \
     do { \
@@ -90,6 +92,7 @@ typedef struct GLClientState GLClientState;
 
 typedef struct GLRenderer GLRenderer;
 typedef struct GLContext GLContext;
+typedef struct ShaderMaterial ShaderMaterial;
 
 typedef struct JMethods {
     JavaVM* jvm;
