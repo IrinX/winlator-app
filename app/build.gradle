@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
+    namespace 'com.winlator'
     compileSdk 34
 
     defaultConfig {
         applicationId 'com.winlator'
         minSdkVersion 26
-        targetSdkVersion 28
+        targetSdkVersion 34
         versionCode 28
         versionName "11.1"
     }
@@ -22,7 +23,7 @@ android {
         }
     }
 
-    lintOptions {
+    lint {
         checkReleaseBuilds false
     }
 
@@ -45,9 +46,9 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.preference:preference:1.2.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'com.github.luben:zstd-jni:1.5.2-3@aar'
     implementation 'org.tukaani:xz:1.7'
     implementation 'org.apache.commons:commons-compress:1.20'
