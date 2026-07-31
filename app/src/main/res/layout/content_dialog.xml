@@ -23,7 +23,7 @@
                 android:id="@+id/IVIcon"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                app:tint="?attr/colorPrimaryVariant"
+                app:tint="?attr/colorPrimary"
                 android:layout_marginRight="8dp"
                 android:visibility="gone" />
 
@@ -31,7 +31,7 @@
                 android:id="@+id/TVTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?attr/colorPrimaryVariant"
+                android:textColor="?attr/colorOnSurface"
                 android:textStyle="bold"
                 android:textSize="18sp" />
         </LinearLayout>
@@ -50,7 +50,7 @@
             android:id="@+id/IVMessageIcon"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            app:tint="?attr/colorPrimaryVariant"
+            app:tint="?attr/colorPrimary"
             android:layout_marginRight="16dp"
             android:visibility="gone" />
 
@@ -102,7 +102,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="?attr/colorPrimaryVariant"
+                android:textColor="?attr/colorPrimary"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
