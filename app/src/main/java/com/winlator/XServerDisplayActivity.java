@@ -442,10 +442,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         if (verifyUserRegistry()) containerDataChanged = true;
         if (extractDXWrapperFiles()) containerDataChanged = true;
 
-        // 每次启动都尝试装入中文字体（内部幂等，旧容器也能自愈），
-        // 解决 Wine 对话框与中文文本因缺中文字形而显示成方框的问题。
+        // 装入内置中文字体（内部幂等，不修改容器 metadata）
         WineUtils.setupCJKFonts(this, container);
-        containerDataChanged = true;
 
         if (!wincomponents.equals(container.getExtra("wincomponents"))) {
             extractWinComponentFiles();
