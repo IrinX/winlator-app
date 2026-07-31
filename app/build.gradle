@@ -36,9 +36,11 @@ android {
     }
 
     packagingOptions {
-        // libFLAC.so 同时由 CMake 编译和 jniLibs 预编译提供，导致 merge 冲突，
-        // 优先取 CMake 产物（与本次构建工具链一致）。
-        pickFirst 'lib/arm64-v8a/libFLAC.so'
+        // midihandler 通过 CMake IMPORTED 引用 jniLibs 中的预编译第三方 .so
+        //（FLAC/fluidsynth/ogg/vorbis 等），AGP 会同时从 jniLibs 和 cxx 产物
+        // 收集到同名 .so 触发 DuplicateRelativeFileException。这些同名库内容一致，
+        // 取任一份即可；winlator 自编的 .so 不在 jniLibs，不会被误伤。
+        pickFirst 'lib/arm64-v8a/*.so'
     }
 }
 
