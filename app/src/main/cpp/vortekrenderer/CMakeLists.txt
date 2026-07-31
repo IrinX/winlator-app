@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project(VortekRenderer)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wno-unused-function -Wimplicit-function-declaration -DVK_USE_PLATFORM_ANDROID_KHR")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wno-unused-function -Wimplicit-function-declaration -DVK_USE_PLATFORM_ANDROID_KHR -Wno-incompatible-pointer-types-discards-qualifiers -Wno-switch -Wno-pointer-sign")
 
 include_directories(include)
 include_directories(../winlator/include)

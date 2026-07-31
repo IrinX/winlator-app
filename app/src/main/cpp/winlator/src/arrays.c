@@ -359,7 +359,7 @@ void ArrayMap_put(ArrayMap* arrayMap, const char* key, void* value) {
         memmove(arrayMap->entries + index + 1, arrayMap->entries + index, (arrayMap->size - index) * sizeof(ArrayMap_Entry));
     }
 
-    arrayMap->entries[index].key = key;
+    arrayMap->entries[index].key = (char*)key;
     arrayMap->entries[index].value = value;
     arrayMap->size++;
 }
