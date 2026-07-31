@@ -34,6 +34,12 @@ android {
             path 'src/main/cpp/CMakeLists.txt'
         }
     }
+
+    packagingOptions {
+        // libFLAC.so 同时由 CMake 编译和 jniLibs 预编译提供，导致 merge 冲突，
+        // 优先取 CMake 产物（与本次构建工具链一致）。
+        pickFirst 'lib/arm64-v8a/libFLAC.so'
+    }
 }
 
 dependencies {
