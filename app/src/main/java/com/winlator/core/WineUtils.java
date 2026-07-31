@@ -429,6 +429,9 @@ public abstract class WineUtils {
         // 每次都写，保证旧容器即使之前没写入也能补上；WineRegistryEditor 是幂等的。
         File systemRegFile = new File(container.getRootDir(), ".wine/system.reg");
         String fontPath = "Z:\\opt\\wine\\share\\wine\\fonts\\notosanscjk.ttc";
+        // 同时登记中文字体名和 Noto 自身 face 名。
+        // Noto face 名必须登记，否则 Replacements 替换后 Wine 仍找不到目标字体。
+        // ttc 含 SC/TC/JP/KR 多 face，Wine 按 face 名匹配加载对应子字体。
         final String[][] cjkFonts = {
             {"SimSun (TrueType)", fontPath},
             {"NSimSun (TrueType)", fontPath},
@@ -437,11 +440,47 @@ public abstract class WineUtils {
             {"Microsoft YaHei Bold (TrueType)", fontPath},
             {"Microsoft JhengHei (TrueType)", fontPath},
             {"KaiTi (TrueType)", fontPath},
-            {"FangSong (TrueType)", fontPath}
+            {"FangSong (TrueType)", fontPath},
+            {"Noto Sans CJK SC (TrueType)", fontPath},
+            {"Noto Sans CJK TC (TrueType)", fontPath},
+            {"Noto Sans CJK JP (TrueType)", fontPath},
+            {"Noto Sans CJK KR (TrueType)", fontPath}
         };
         try (WineRegistryEditor registryEditor = new WineRegistryEditor(systemRegFile)) {
             registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", cjkFonts);
             registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", cjkFonts);
+        }
+
+        // 关键：在 user.reg 写入 Fonts\Replacements，把应用可能请求的各种中文字体名
+        // （含中文别名"宋体""黑体""微软雅黑"等）全部替换为我们已注册的 SimSun。
+        // 目标用 SimSun 而非 Noto face 名，因为 SimSun 在上面 Fonts 注册表里一定登记过，
+        // 无论 ttc 真实 face 名是 Noto Sans CJK SC 还是 Noto Sans SC，替换链都能闭合。
+        // 没有这一步，galgame 用中文名请求字体会找不到，Wine 不回退直接显示方框。
+        File userRegFile = new File(container.getRootDir(), ".wine/user.reg");
+        final String[][] replacements = {
+            {"NSimSun", "SimSun"},
+            {"SimHei", "SimSun"},
+            {"Microsoft YaHei", "SimSun"},
+            {"Microsoft YaHei UI", "SimSun"},
+            {"Microsoft JhengHei", "SimSun"},
+            {"Microsoft JhengHei UI", "SimSun"},
+            {"KaiTi", "SimSun"},
+            {"FangSong", "SimSun"},
+            // 中文别名
+            {"宋体", "SimSun"},
+            {"新宋体", "SimSun"},
+            {"黑体", "SimSun"},
+            {"微软雅黑", "SimSun"},
+            {"楷体", "SimSun"},
+            {"仿宋", "SimSun"},
+            // 日文/韩文也兜底到同一字体（Noto Sans CJK 含日韩字形）
+            {"MS Gothic", "SimSun"},
+            {"MS PGothic", "SimSun"},
+            {"MS UI Gothic", "SimSun"},
+            {"Malgun Gothic", "SimSun"}
+        };
+        try (WineRegistryEditor registryEditor = new WineRegistryEditor(userRegFile)) {
+            registryEditor.setStringValues("Software\\Wine\\Fonts\\Replacements", replacements);
         }
     }
 
