@@ -258,6 +258,7 @@
     <string name="active_windows">活动窗口</string>
     <string name="show_desktop">显示桌面</string>
     <string name="language">语言</string>
+    <string name="container_language">容器语言</string>
     <string name="image_cache_size">图像缓存大小</string>
     <string name="pip_mode">画中画模式</string>
     <string name="resource_memory_type">资源内存类型</string>

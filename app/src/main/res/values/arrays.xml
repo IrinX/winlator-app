@@ -147,6 +147,13 @@
         <item>Русский</item>
         <item>中文</item>
     </string-array>
+    <!-- 容器内 Wine 的语言/codepage，与 App 自身 UI 语言独立。
+         索引对应 WineUtils.CONTAINER_LOCALES：0=en,1=zh_CN,2=ja_JP -->
+    <string-array name="container_language_entries">
+        <item>English</item>
+        <item>中文 (简体)</item>
+        <item>日本語</item>
+    </string-array>
     <string-array name="resource_memory_type_entries">
         <item>@string/auto</item>
         <item>Opaque FD</item>

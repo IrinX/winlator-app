@@ -1,6 +1,9 @@
 package com.winlator.core;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+
+import androidx.preference.PreferenceManager;
 
 import com.winlator.container.Container;
 import com.winlator.container.Drive;
@@ -375,6 +378,63 @@ public abstract class WineUtils {
 
         registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", wineFonts);
         registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", wineFonts);
+    }
+
+    /**
+     * 容器语言配置：索引对应 arrays.xml 的 container_language_entries。
+     * 每项含 Wine Language、ANSI/OEM codepage、系统字体 charSet。
+     * charSet: 0=DEFAULT_CHARSET, 134=GB2312(简中), 128=SHIFTJIS(日文)。
+     */
+    public static final String[][] CONTAINER_LOCALES = {
+        {"en_US", "1252", "1252", "0"},   // English
+        {"zh_CN", "936",  "936",  "134"}, // 简体中文 (GBK)
+        {"ja_JP", "932",  "932",  "128"}  // 日本語 (Shift-JIS)
+    };
+
+    /**
+     * 把设置页选定的容器语言同步到 Wine 注册表：写 codepage（ACP/OEMCP/MACCP）
+     * 让 Wine 用对应编码解析文件名与 ANSI 文本；写 Wine Language 控制 Wine UI 语言；
+     * CJK 语言额外把系统 UI 字体 charSet 设为对应字符集并指向中文字体。
+     * 设置变更后下次启动容器即生效。
+     */
+    public static void applyContainerLocale(Context context, Container container) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        int idx = preferences.getInt("container_language", 1);
+        if (idx < 0 || idx >= CONTAINER_LOCALES.length) idx = 0;
+        String[] locale = CONTAINER_LOCALES[idx];
+        String wineLang = locale[0];
+        String acp = locale[1];
+        String oemcp = locale[2];
+        byte charSet = Byte.parseByte(locale[3]);
+
+        File containerDir = container.getRootDir();
+        File systemRegFile = new File(containerDir, ".wine/system.reg");
+        try (WineRegistryEditor registryEditor = new WineRegistryEditor(systemRegFile)) {
+            // Windows codepage：决定 Wine 解码文件名与 ANSI 文本的方式
+            registryEditor.setStringValue("Software\\Microsoft\\Windows NT\\CurrentVersion\\Codepage", "ACP", acp);
+            registryEditor.setStringValue("Software\\Microsoft\\Windows NT\\CurrentVersion\\Codepage", "OEMCP", oemcp);
+            registryEditor.setStringValue("Software\\Microsoft\\Windows NT\\CurrentVersion\\Codepage", "MACCP", "10008");
+            // Wine 自身 UI 语言
+            registryEditor.setStringValue("Software\\Wine\\Language", null, wineLang);
+        }
+
+        // CJK 语言需把系统 UI 字体（标题栏/菜单/消息框）charSet 设为对应 CJK 字符集，
+        // 并指向中文字体，否则 explorer 等 UI 文字会变方框。英文语言保留用户字体设置。
+        if (charSet != 0) {
+            File userRegFile = new File(containerDir, ".wine/user.reg");
+            try (WineRegistryEditor registryEditor = new WineRegistryEditor(userRegFile)) {
+                String face = "WenQuanYi Micro Hei";
+                byte[] normal = (new MSLogFont()).setFaceName(face).setCharSet(charSet).toByteArray();
+                byte[] bold = (new MSLogFont()).setFaceName(face).setCharSet(charSet).setWeight(700).toByteArray();
+                String metrics = "Control Panel\\Desktop\\WindowMetrics";
+                registryEditor.setHexValues(metrics, "CaptionFont", bold);
+                registryEditor.setHexValues(metrics, "IconFont", normal);
+                registryEditor.setHexValues(metrics, "MenuFont", normal);
+                registryEditor.setHexValues(metrics, "MessageFont", normal);
+                registryEditor.setHexValues(metrics, "SmCaptionFont", normal);
+                registryEditor.setHexValues(metrics, "StatusFont", normal);
+            }
+        }
     }
 
     /**

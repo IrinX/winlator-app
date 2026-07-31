@@ -442,6 +442,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         if (verifyUserRegistry()) containerDataChanged = true;
         if (extractDXWrapperFiles()) containerDataChanged = true;
 
+        // 同步设置页选定的容器语言（codepage + Wine Language），解决文件名乱码
+        WineUtils.applyContainerLocale(this, container);
         // 装入内置中文字体（内部幂等，不修改容器 metadata）
         WineUtils.setupCJKFonts(this, container);
 
