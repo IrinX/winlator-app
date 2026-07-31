@@ -89,8 +89,6 @@ public abstract class WineUtils {
                 setupSystemFonts(registryEditor);
                 FileUtils.writeString(corefontsAddedFile, String.valueOf(System.currentTimeMillis()));
             }
-
-            setupCJKFonts(context, rootDir, registryEditor);
         }
 
         final String[] direct3dLibs = {"d3d8", "d3d9", "d3d10", "d3d10_1", "d3d10core", "d3d11", "d3d12", "d3d12core", "ddraw", "dxgi", "wined3d"};
@@ -382,38 +380,54 @@ public abstract class WineUtils {
     /**
      * 把 Android 系统自带的 CJK 字体装入容器并在注册表登记常见中文字体名映射，
      * 解决 Wine 对话框与中文程序文本因缺少中文字形而显示成方框（tofu）的问题。
-     * 字体复制到 rootfs 全局字体目录，所有容器共享；用 cjkfonts.added 标记防重。
+     * 字体文件复制到 rootfs 全局字体目录（所有容器共享），中文字体注册表写入
+     * 当前容器的 system.reg。
+     *
+     * 该方法在每次容器启动时调用（setupWineSystemFiles），内部幂等：
+     * 只要字体文件已存在且标记已写就跳过；任一缺失都会重做以自愈旧容器。
      */
-    private static void setupCJKFonts(Context context, File rootDir, WineRegistryEditor registryEditor) {
+    public static void setupCJKFonts(Context context, Container container) {
+        File rootDir = RootFS.find(context).getRootDir();
         File userConfigDir = new File(rootDir, RootFS.USER_CONFIG_PATH);
         File cjkFontsAddedFile = new File(userConfigDir, "cjkfonts.added");
-        if (cjkFontsAddedFile.isFile()) return;
-
-        // 按优先级检测 Android 系统 CJK 字体
-        File srcFile = null;
-        for (String path : new String[]{
-            "/system/fonts/NotoSansCJK-Regular.ttc",
-            "/system/fonts/NotoSansSC-Regular.otf",
-            "/system/fonts/NotoSerifCJK-Regular.ttc",
-            "/system/fonts/DroidSansFallback.ttf"
-        }) {
-            File candidate = new File(path);
-            if (candidate.isFile()) { srcFile = candidate; break; }
-        }
-        if (srcFile == null) {
-            // 找不到系统 CJK 字体，写标记避免反复查找
-            FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
-            return;
-        }
-
-        // 复制到 rootfs 全局字体目录（Z:\opt\wine\share\wine\fonts\），所有容器共享
         File destDir = new File(rootDir, "/opt/wine/share/wine/fonts");
-        if (!destDir.isDirectory()) destDir.mkdirs();
         File destFile = new File(destDir, "notosanscjk.ttc");
-        boolean fontReady = destFile.isFile() || FileUtils.copy(srcFile, destFile);
-        if (!fontReady) return; // 复制失败，不写标记，下次重试
 
-        // 将常见中文字体名全部映射到该 CJK 字体文件
+        // 双重判断：标记存在 AND 字体文件实际存在，才跳过字体复制。否则重做以自愈旧容器。
+        if (!(cjkFontsAddedFile.isFile() && destFile.isFile() && destFile.length() > 0)) {
+            // 按优先级检测 Android 系统 CJK 字体（isFile 会跟随 symlink 判断真实文件）
+            File srcFile = null;
+            for (String path : new String[]{
+                "/system/fonts/NotoSansCJK-Regular.ttc",
+                "/system/fonts/NotoSansSC-Regular.otf",
+                "/system/fonts/NotoSerifCJK-Regular.ttc",
+                "/system/fonts/DroidSansFallback.ttf",
+                "/system/fonts/NotoSansCJK-Regular.ttc.otf"
+            }) {
+                File candidate = new File(path);
+                if (candidate.isFile()) { srcFile = candidate; break; }
+            }
+            if (srcFile == null) {
+                // 找不到系统 CJK 字体，写标记避免每次启动都扫描系统字体目录
+                FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
+                return;
+            }
+
+            // 复制到 rootfs 全局字体目录，所有容器共享。
+            // 注意：不能用 FileUtils.copy，它在源为 symlink 时会跳过复制；
+            // Android 系统 CJK 字体常以 symlink 形式存在，这里用流式复制读取真实内容。
+            if (!destDir.isDirectory()) destDir.mkdirs();
+            if (!destFile.isFile() || destFile.length() == 0) {
+                destFile.delete();
+                boolean ok = copyFontFileByStream(srcFile, destFile);
+                if (!ok) return; // 复制失败，不写标记，下次启动重试
+            }
+            FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
+        }
+
+        // 注册表写入当前容器的 system.reg（通过 container.getRootDir() 定位）。
+        // 每次都写，保证旧容器即使之前没写入也能补上；WineRegistryEditor 是幂等的。
+        File systemRegFile = new File(container.getRootDir(), ".wine/system.reg");
         String fontPath = "Z:\\opt\\wine\\share\\wine\\fonts\\notosanscjk.ttc";
         final String[][] cjkFonts = {
             {"SimSun (TrueType)", fontPath},
@@ -425,9 +439,33 @@ public abstract class WineUtils {
             {"KaiTi (TrueType)", fontPath},
             {"FangSong (TrueType)", fontPath}
         };
-        registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", cjkFonts);
-        registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", cjkFonts);
+        try (WineRegistryEditor registryEditor = new WineRegistryEditor(systemRegFile)) {
+            registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", cjkFonts);
+            registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", cjkFonts);
+        }
+    }
 
-        FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
+    /**
+     * 通过字节流复制字体文件，绕过 FileUtils.copy 对 symlink 的跳过逻辑。
+     * 系统字体可能是 symlink，FileInputStream 会跟随到真实文件读取内容。
+     */
+    private static boolean copyFontFileByStream(File srcFile, File destFile) {
+        java.io.FileInputStream in = null;
+        java.io.FileOutputStream out = null;
+        try {
+            in = new java.io.FileInputStream(srcFile);
+            out = new java.io.FileOutputStream(destFile);
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = in.read(buffer)) != -1) out.write(buffer, 0, len);
+            out.flush();
+            return destFile.length() > 0;
+        } catch (IOException e) {
+            return false;
+        } finally {
+            if (in != null) try { in.close(); } catch (IOException ignored) {}
+            if (out != null) try { out.close(); } catch (IOException ignored) {}
+            if (!destFile.isFile() || destFile.length() == 0) destFile.delete();
+        }
     }
 }
