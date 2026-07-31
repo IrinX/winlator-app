@@ -50,6 +50,8 @@
 
         <!-- Widget overrides -->
         <item name="android:textViewStyle">@style/TextView</item>
+        <item name="android:editTextStyle">@style/Widget.Material3.EditText</item>
+        <item name="editTextStyle">@style/Widget.Material3.EditText</item>
         <item name="android:checkboxStyle">@style/CheckBox</item>
         <item name="android:listPopupWindowStyle">@style/ListPopupWindow</item>
         <item name="listPopupWindowStyle">@style/ListPopupWindow</item>
@@ -87,7 +89,7 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
-    <style name="ComboBox">
+    <style name="ComboBox" parent="@style/Widget.Material3.Spinner">
         <item name="android:layout_width">192dp</item>
         <item name="android:layout_height">42dp</item>
         <item name="android:focusable">true</item>
@@ -105,7 +107,7 @@
         <item name="android:background">@drawable/combo_box</item>
         <item name="android:popupBackground">?attr/popupMenuBackground</item>
     </style>
-    <style name="MultiSelectionComboBox">
+    <style name="MultiSelectionComboBox" parent="@style/Widget.Material3.Spinner">
         <item name="android:layout_width">192dp</item>
         <item name="android:layout_height">42dp</item>
         <item name="android:focusable">true</item>
@@ -120,7 +122,7 @@
         <item name="android:maxLines">1</item>
         <item name="android:background">@drawable/combo_box</item>
     </style>
-    <style name="SpinnerDropDownItem" parent="@android:style/Widget.Holo.DropDownItem.Spinner">
+    <style name="SpinnerDropDownItem" parent="@style/Widget.Material3.TextView.SpinnerItem">
         <item name="android:textColor">?attr/colorPrimaryText</item>
     </style>
     <style name="ListPopupWindow" parent="@android:style/Widget.ListPopupWindow">
@@ -139,7 +141,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">?attr/popupMenuBackground</item>
     </style>
-    <style name="EditText">
+    <style name="EditText" parent="@style/Widget.Material3.EditText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">42dp</item>
         <item name="android:textSize">16sp</item>
@@ -154,7 +156,7 @@
         <item name="android:inputType">text</item>
         <item name="android:background">@drawable/edit_text</item>
     </style>
-    <style name="TextView" parent="@android:style/Widget.TextView">
+    <style name="TextView" parent="@style/Widget.Material3.TextView">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?attr/colorPrimaryText</item>
     </style>
