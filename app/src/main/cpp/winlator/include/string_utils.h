@@ -3,6 +3,7 @@
 
 #include <ctype.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "arrays.h"
 
