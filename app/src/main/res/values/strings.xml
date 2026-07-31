@@ -314,7 +314,6 @@
     <string name="active_windows">Active Windows</string>
     <string name="show_desktop">Show Desktop</string>
     <string name="language">Language</string>
-    <string name="container_language">Container Language</string>
     <string name="image_cache_size">Image Cache Size</string>
     <string name="pip_mode">PiP Mode</string>
     <string name="adrenotools_driver" translatable="false">Adrenotools Driver</string>

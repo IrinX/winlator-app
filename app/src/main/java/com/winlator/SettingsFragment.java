@@ -176,9 +176,6 @@ public class SettingsFragment extends Fragment {
         sLanguage.setSelection(LocaleHelper.getLocaleIndex(context));
         final int oldLCIndex = sLanguage.getSelectedItemPosition();
 
-        final Spinner sContainerLanguage = view.findViewById(R.id.SContainerLanguage);
-        sContainerLanguage.setSelection(preferences.getInt("container_language", 1));
-
         view.findViewById(R.id.BTReinstallSystemFiles).setOnClickListener((v) -> {
             ContentDialog.confirm(context, R.string.do_you_want_to_reinstall_system_files, () -> RootFSInstaller.install((MainActivity)getActivity()));
         });
@@ -217,7 +214,6 @@ public class SettingsFragment extends Fragment {
 
             int newLCIndex = sLanguage.getSelectedItemPosition();
             editor.putInt("lc_index", newLCIndex);
-            editor.putInt("container_language", sContainerLanguage.getSelectedItemPosition());
             boolean restartApp = oldLCIndex != newLCIndex || oldAppThemeId != newAppThemeId;
 
             int midiInputDevicePosition = sMIDIInputDevice.getSelectedItemPosition();

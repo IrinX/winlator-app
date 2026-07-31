@@ -444,8 +444,6 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
 
         // 装入内置中文字体（内部幂等，不修改容器 metadata）
         WineUtils.setupCJKFonts(this, container);
-        // 诊断：applyContainerLocale 暂时禁用，定位崩溃原因
-        // WineUtils.applyContainerLocale(this, container);
 
         if (!wincomponents.equals(container.getExtra("wincomponents"))) {
             extractWinComponentFiles();
