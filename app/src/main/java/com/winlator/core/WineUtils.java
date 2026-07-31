@@ -403,17 +403,11 @@ public abstract class WineUtils {
         if (idx < 0 || idx >= CONTAINER_LOCALES.length) idx = 0;
         String[] locale = CONTAINER_LOCALES[idx];
         String wineLang = locale[0];
-        String acp = locale[1];
-        String oemcp = locale[2];
         byte charSet = Byte.parseByte(locale[3]);
 
         File containerDir = container.getRootDir();
         File systemRegFile = new File(containerDir, ".wine/system.reg");
         try (WineRegistryEditor registryEditor = new WineRegistryEditor(systemRegFile)) {
-            // Windows codepage：决定 Wine 解码文件名与 ANSI 文本的方式
-            registryEditor.setStringValue("Software\\Microsoft\\Windows NT\\CurrentVersion\\Codepage", "ACP", acp);
-            registryEditor.setStringValue("Software\\Microsoft\\Windows NT\\CurrentVersion\\Codepage", "OEMCP", oemcp);
-            registryEditor.setStringValue("Software\\Microsoft\\Windows NT\\CurrentVersion\\Codepage", "MACCP", "10008");
             // Wine 自身 UI 语言
             registryEditor.setStringValue("Software\\Wine\\Language", null, wineLang);
         }
