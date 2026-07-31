@@ -378,61 +378,39 @@ public abstract class WineUtils {
     }
 
     /**
-     * 把 Android 系统自带的 CJK 字体装入容器并在注册表登记常见中文字体名映射，
+     * 把内置的文泉驿微米黑 CJK 字体装入容器并在注册表登记中文字体名映射，
      * 解决 Wine 对话框与中文程序文本因缺少中文字形而显示成方框（tofu）的问题。
-     * 字体文件复制到 rootfs 全局字体目录（所有容器共享），中文字体注册表写入
-     * 当前容器的 system.reg。
+     *
+     * 不再依赖运行时提取本机字体（symlink/SELinux/face 名不确定太多坑），
+     * 而是从 assets/fonts/wqy-microhei.ttc 内置字体复制到容器的
+     * drive_c/windows/Fonts/（Windows 标准字体目录，Wine 默认查找路径），
+     * face 名 WenQuanYi Micro Hei 是确定的，替换链可靠闭合。
      *
      * 该方法在每次容器启动时调用（setupWineSystemFiles），内部幂等：
-     * 只要字体文件已存在且标记已写就跳过；任一缺失都会重做以自愈旧容器。
+     * 字体文件已存在则跳过复制；注册表每次都重写以保证旧容器自愈。
      */
     public static void setupCJKFonts(Context context, Container container) {
-        File rootDir = RootFS.find(context).getRootDir();
-        File userConfigDir = new File(rootDir, RootFS.USER_CONFIG_PATH);
-        File cjkFontsAddedFile = new File(userConfigDir, "cjkfonts.added");
-        File destDir = new File(rootDir, "/opt/wine/share/wine/fonts");
-        File destFile = new File(destDir, "notosanscjk.ttc");
+        File containerDir = container.getRootDir();
+        File fontsDir = new File(containerDir, ".wine/drive_c/windows/Fonts");
+        File destFile = new File(fontsDir, "wqy-microhei.ttc");
 
-        // 双重判断：标记存在 AND 字体文件实际存在，才跳过字体复制。否则重做以自愈旧容器。
-        if (!(cjkFontsAddedFile.isFile() && destFile.isFile() && destFile.length() > 0)) {
-            // 按优先级检测 Android 系统 CJK 字体（isFile 会跟随 symlink 判断真实文件）
-            File srcFile = null;
-            for (String path : new String[]{
-                "/system/fonts/NotoSansCJK-Regular.ttc",
-                "/system/fonts/NotoSansSC-Regular.otf",
-                "/system/fonts/NotoSerifCJK-Regular.ttc",
-                "/system/fonts/DroidSansFallback.ttf",
-                "/system/fonts/NotoSansCJK-Regular.ttc.otf"
-            }) {
-                File candidate = new File(path);
-                if (candidate.isFile()) { srcFile = candidate; break; }
-            }
-            if (srcFile == null) {
-                // 找不到系统 CJK 字体，写标记避免每次启动都扫描系统字体目录
-                FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
-                return;
-            }
-
-            // 复制到 rootfs 全局字体目录，所有容器共享。
-            // 注意：不能用 FileUtils.copy，它在源为 symlink 时会跳过复制；
-            // Android 系统 CJK 字体常以 symlink 形式存在，这里用流式复制读取真实内容。
-            if (!destDir.isDirectory()) destDir.mkdirs();
-            if (!destFile.isFile() || destFile.length() == 0) {
-                destFile.delete();
-                boolean ok = copyFontFileByStream(srcFile, destFile);
-                if (!ok) return; // 复制失败，不写标记，下次启动重试
-            }
-            FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
+        // 字体文件不存在则从 assets 复制（幂等，已存在则跳过）
+        if (!destFile.isFile() || destFile.length() == 0) {
+            if (!fontsDir.isDirectory()) fontsDir.mkdirs();
+            destFile.delete();
+            FileUtils.copy(context, "fonts/wqy-microhei.ttc", destFile);
+            if (!destFile.isFile() || destFile.length() == 0) return; // 复制失败，下次启动重试
         }
 
-        // 注册表写入当前容器的 system.reg（通过 container.getRootDir() 定位）。
-        // 每次都写，保证旧容器即使之前没写入也能补上；WineRegistryEditor 是幂等的。
-        File systemRegFile = new File(container.getRootDir(), ".wine/system.reg");
-        String fontPath = "Z:\\opt\\wine\\share\\wine\\fonts\\notosanscjk.ttc";
-        // 同时登记中文字体名和 Noto 自身 face 名。
-        // Noto face 名必须登记，否则 Replacements 替换后 Wine 仍找不到目标字体。
-        // ttc 含 SC/TC/JP/KR 多 face，Wine 按 face 名匹配加载对应子字体。
+        // 注册表写入当前容器的 system.reg。每次都写，保证旧容器自愈。
+        // 字体路径用 Windows 风格：C:\windows\Fonts\wqy-microhei.ttc
+        File systemRegFile = new File(containerDir, ".wine/system.reg");
+        String fontPath = "C:\\windows\\Fonts\\wqy-microhei.ttc";
+        // 登记文泉驿自身 face 名 + 常见中文字体名，全部指向同一 ttc。
+        // 文泉驿微米黑 face 名为 "WenQuanYi Micro Hei"，必须登记以便 Replacements 替换后命中。
         final String[][] cjkFonts = {
+            {"WenQuanYi Micro Hei (TrueType)", fontPath},
+            {"WenQuanYi Micro Hei Mono (TrueType)", fontPath},
             {"SimSun (TrueType)", fontPath},
             {"NSimSun (TrueType)", fontPath},
             {"SimHei (TrueType)", fontPath},
@@ -440,71 +418,43 @@ public abstract class WineUtils {
             {"Microsoft YaHei Bold (TrueType)", fontPath},
             {"Microsoft JhengHei (TrueType)", fontPath},
             {"KaiTi (TrueType)", fontPath},
-            {"FangSong (TrueType)", fontPath},
-            {"Noto Sans CJK SC (TrueType)", fontPath},
-            {"Noto Sans CJK TC (TrueType)", fontPath},
-            {"Noto Sans CJK JP (TrueType)", fontPath},
-            {"Noto Sans CJK KR (TrueType)", fontPath}
+            {"FangSong (TrueType)", fontPath}
         };
         try (WineRegistryEditor registryEditor = new WineRegistryEditor(systemRegFile)) {
             registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", cjkFonts);
             registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", cjkFonts);
         }
 
-        // 关键：在 user.reg 写入 Fonts\Replacements，把应用可能请求的各种中文字体名
-        // （含中文别名"宋体""黑体""微软雅黑"等）全部替换为我们已注册的 SimSun。
-        // 目标用 SimSun 而非 Noto face 名，因为 SimSun 在上面 Fonts 注册表里一定登记过，
-        // 无论 ttc 真实 face 名是 Noto Sans CJK SC 还是 Noto Sans SC，替换链都能闭合。
+        // 在 user.reg 写入 Fonts\Replacements，把应用可能请求的各种中文字体名
+        // （含中文别名"宋体""黑体""微软雅黑"等）全部替换为 WenQuanYi Micro Hei。
+        // 目标用文泉驿的确定 face 名，无论设备本机字体如何都能闭合替换链。
         // 没有这一步，galgame 用中文名请求字体会找不到，Wine 不回退直接显示方框。
-        File userRegFile = new File(container.getRootDir(), ".wine/user.reg");
+        File userRegFile = new File(containerDir, ".wine/user.reg");
         final String[][] replacements = {
-            {"NSimSun", "SimSun"},
-            {"SimHei", "SimSun"},
-            {"Microsoft YaHei", "SimSun"},
-            {"Microsoft YaHei UI", "SimSun"},
-            {"Microsoft JhengHei", "SimSun"},
-            {"Microsoft JhengHei UI", "SimSun"},
-            {"KaiTi", "SimSun"},
-            {"FangSong", "SimSun"},
+            {"SimSun", "WenQuanYi Micro Hei"},
+            {"NSimSun", "WenQuanYi Micro Hei"},
+            {"SimHei", "WenQuanYi Micro Hei"},
+            {"Microsoft YaHei", "WenQuanYi Micro Hei"},
+            {"Microsoft YaHei UI", "WenQuanYi Micro Hei"},
+            {"Microsoft JhengHei", "WenQuanYi Micro Hei"},
+            {"Microsoft JhengHei UI", "WenQuanYi Micro Hei"},
+            {"KaiTi", "WenQuanYi Micro Hei"},
+            {"FangSong", "WenQuanYi Micro Hei"},
             // 中文别名
-            {"宋体", "SimSun"},
-            {"新宋体", "SimSun"},
-            {"黑体", "SimSun"},
-            {"微软雅黑", "SimSun"},
-            {"楷体", "SimSun"},
-            {"仿宋", "SimSun"},
-            // 日文/韩文也兜底到同一字体（Noto Sans CJK 含日韩字形）
-            {"MS Gothic", "SimSun"},
-            {"MS PGothic", "SimSun"},
-            {"MS UI Gothic", "SimSun"},
-            {"Malgun Gothic", "SimSun"}
+            {"宋体", "WenQuanYi Micro Hei"},
+            {"新宋体", "WenQuanYi Micro Hei"},
+            {"黑体", "WenQuanYi Micro Hei"},
+            {"微软雅黑", "WenQuanYi Micro Hei"},
+            {"楷体", "WenQuanYi Micro Hei"},
+            {"仿宋", "WenQuanYi Micro Hei"},
+            // 日文/韩文也兜底到同一字体（文泉驿含 CJK 基本字形）
+            {"MS Gothic", "WenQuanYi Micro Hei"},
+            {"MS PGothic", "WenQuanYi Micro Hei"},
+            {"MS UI Gothic", "WenQuanYi Micro Hei"},
+            {"Malgun Gothic", "WenQuanYi Micro Hei"}
         };
         try (WineRegistryEditor registryEditor = new WineRegistryEditor(userRegFile)) {
             registryEditor.setStringValues("Software\\Wine\\Fonts\\Replacements", replacements);
-        }
-    }
-
-    /**
-     * 通过字节流复制字体文件，绕过 FileUtils.copy 对 symlink 的跳过逻辑。
-     * 系统字体可能是 symlink，FileInputStream 会跟随到真实文件读取内容。
-     */
-    private static boolean copyFontFileByStream(File srcFile, File destFile) {
-        java.io.FileInputStream in = null;
-        java.io.FileOutputStream out = null;
-        try {
-            in = new java.io.FileInputStream(srcFile);
-            out = new java.io.FileOutputStream(destFile);
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = in.read(buffer)) != -1) out.write(buffer, 0, len);
-            out.flush();
-            return destFile.length() > 0;
-        } catch (IOException e) {
-            return false;
-        } finally {
-            if (in != null) try { in.close(); } catch (IOException ignored) {}
-            if (out != null) try { out.close(); } catch (IOException ignored) {}
-            if (!destFile.isFile() || destFile.length() == 0) destFile.delete();
         }
     }
 }
