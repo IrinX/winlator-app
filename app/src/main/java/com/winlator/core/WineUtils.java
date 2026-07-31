@@ -89,6 +89,8 @@ public abstract class WineUtils {
                 setupSystemFonts(registryEditor);
                 FileUtils.writeString(corefontsAddedFile, String.valueOf(System.currentTimeMillis()));
             }
+
+            setupCJKFonts(context, rootDir, registryEditor);
         }
 
         final String[] direct3dLibs = {"d3d8", "d3d9", "d3d10", "d3d10_1", "d3d10core", "d3d11", "d3d12", "d3d12core", "ddraw", "dxgi", "wined3d"};
@@ -375,5 +377,57 @@ public abstract class WineUtils {
 
         registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", wineFonts);
         registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", wineFonts);
+    }
+
+    /**
+     * 把 Android 系统自带的 CJK 字体装入容器并在注册表登记常见中文字体名映射，
+     * 解决 Wine 对话框与中文程序文本因缺少中文字形而显示成方框（tofu）的问题。
+     * 字体复制到 rootfs 全局字体目录，所有容器共享；用 cjkfonts.added 标记防重。
+     */
+    private static void setupCJKFonts(Context context, File rootDir, WineRegistryEditor registryEditor) {
+        File userConfigDir = new File(rootDir, RootFS.USER_CONFIG_PATH);
+        File cjkFontsAddedFile = new File(userConfigDir, "cjkfonts.added");
+        if (cjkFontsAddedFile.isFile()) return;
+
+        // 按优先级检测 Android 系统 CJK 字体
+        File srcFile = null;
+        for (String path : new String[]{
+            "/system/fonts/NotoSansCJK-Regular.ttc",
+            "/system/fonts/NotoSansSC-Regular.otf",
+            "/system/fonts/NotoSerifCJK-Regular.ttc",
+            "/system/fonts/DroidSansFallback.ttf"
+        }) {
+            File candidate = new File(path);
+            if (candidate.isFile()) { srcFile = candidate; break; }
+        }
+        if (srcFile == null) {
+            // 找不到系统 CJK 字体，写标记避免反复查找
+            FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
+            return;
+        }
+
+        // 复制到 rootfs 全局字体目录（Z:\opt\wine\share\wine\fonts\），所有容器共享
+        File destDir = new File(rootDir, "/opt/wine/share/wine/fonts");
+        if (!destDir.isDirectory()) destDir.mkdirs();
+        File destFile = new File(destDir, "notosanscjk.ttc");
+        boolean fontReady = destFile.isFile() || FileUtils.copy(srcFile, destFile);
+        if (!fontReady) return; // 复制失败，不写标记，下次重试
+
+        // 将常见中文字体名全部映射到该 CJK 字体文件
+        String fontPath = "Z:\\opt\\wine\\share\\wine\\fonts\\notosanscjk.ttc";
+        final String[][] cjkFonts = {
+            {"SimSun (TrueType)", fontPath},
+            {"NSimSun (TrueType)", fontPath},
+            {"SimHei (TrueType)", fontPath},
+            {"Microsoft YaHei (TrueType)", fontPath},
+            {"Microsoft YaHei Bold (TrueType)", fontPath},
+            {"Microsoft JhengHei (TrueType)", fontPath},
+            {"KaiTi (TrueType)", fontPath},
+            {"FangSong (TrueType)", fontPath}
+        };
+        registryEditor.setStringValues("Software\\Microsoft\\Windows\\CurrentVersion\\Fonts", cjkFonts);
+        registryEditor.setStringValues("Software\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", cjkFonts);
+
+        FileUtils.writeString(cjkFontsAddedFile, String.valueOf(System.currentTimeMillis()));
     }
 }
