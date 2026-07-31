@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Expressive color tokens (light). Dark variants in values-night/colors.xml -->
+    <color name="md_primary">#607d8b</color>
+    <color name="md_on_primary">#ffffff</color>
+    <color name="md_primary_container">#c5dbe5</color>
+    <color name="md_on_primary_container">#1b3540</color>
+    <color name="md_secondary">#0288d1</color>
+    <color name="md_on_secondary">#ffffff</color>
+    <color name="md_secondary_container">#b4e5ff</color>
+    <color name="md_on_secondary_container">#001f2e</color>
+    <color name="md_tertiary">#56677a</color>
+    <color name="md_on_tertiary">#ffffff</color>
+    <color name="md_tertiary_container">#dbe3f5</color>
+    <color name="md_on_tertiary_container">#131f2c</color>
+    <color name="md_error">#ba1a1a</color>
+    <color name="md_on_error">#ffffff</color>
+    <color name="md_error_container">#ffdad6</color>
+    <color name="md_on_error_container">#410002</color>
+    <color name="md_background">#fafafa</color>
+    <color name="md_on_background">#1a1c1e</color>
+    <color name="md_surface">#fafafa</color>
+    <color name="md_on_surface">#1a1c1e</color>
+    <color name="md_surface_variant">#dfe3eb</color>
+    <color name="md_on_surface_variant">#42474e</color>
+    <color name="md_outline">#73777f</color>
+    <color name="md_outline_variant">#c3c7cf</color>
+    <color name="md_inverse_surface">#2f3033</color>
+    <color name="md_inverse_on_surface">#f1f0f1</color>
+    <color name="md_inverse_primary">#a4cdd9</color>
+    <color name="md_surface_tint">#607d8b</color>
+    <color name="md_shadow">#000000</color>
+    <color name="md_scrim">#000000</color>
+</resources>

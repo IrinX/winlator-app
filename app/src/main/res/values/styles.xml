@@ -1,10 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppThemeBase" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="tabSelectedTextColor">?attr/colorPrimaryText</item>
-        <item name="tabTextColor">?attr/colorSecondaryText</item>
-        <item name="android:windowBackground">?attr/colorPrimarySurface</item>
-        <item name="android:colorBackground">?attr/colorPrimarySurface</item>
+    <style name="AppThemeBase" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- M3 color tokens (DayNight via values / values-night) -->
+        <item name="colorPrimary">@color/md_primary</item>
+        <item name="colorOnPrimary">@color/md_on_primary</item>
+        <item name="colorPrimaryContainer">@color/md_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/md_on_primary_container</item>
+        <item name="colorSecondary">@color/md_secondary</item>
+        <item name="colorOnSecondary">@color/md_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/md_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/md_on_secondary_container</item>
+        <item name="colorTertiary">@color/md_tertiary</item>
+        <item name="colorOnTertiary">@color/md_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/md_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/md_on_tertiary_container</item>
+        <item name="colorError">@color/md_error</item>
+        <item name="colorOnError">@color/md_on_error</item>
+        <item name="colorErrorContainer">@color/md_error_container</item>
+        <item name="colorOnErrorContainer">@color/md_on_error_container</item>
+        <item name="colorBackground">@color/md_background</item>
+        <item name="colorOnBackground">@color/md_on_background</item>
+        <item name="android:colorBackground">@color/md_background</item>
+        <item name="colorSurface">@color/md_surface</item>
+        <item name="colorOnSurface">@color/md_on_surface</item>
+        <item name="colorSurfaceVariant">@color/md_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/md_on_surface_variant</item>
+        <item name="colorOutline">@color/md_outline</item>
+        <item name="colorOutlineVariant">@color/md_outline_variant</item>
+        <item name="colorInverseSurface">@color/md_inverse_surface</item>
+        <item name="colorInverseOnSurface">@color/md_inverse_on_surface</item>
+        <item name="colorInversePrimary">@color/md_inverse_primary</item>
+        <item name="colorSurfaceTint">@color/md_surface_tint</item>
+
+        <!-- Legacy custom attr mapping -> M3 tokens (keeps existing styles/drawables/layouts working) -->
+        <item name="colorPrimaryText">@color/md_on_surface</item>
+        <item name="colorSecondaryText">@color/md_on_surface_variant</item>
+        <item name="colorSecondarySurface">@color/md_surface_variant</item>
+        <item name="colorPrimarySurface">@color/md_surface</item>
+        <item name="colorPrimaryVariant">@color/md_outline</item>
+        <item name="colorSecondaryVariant">@color/md_surface_variant</item>
+        <item name="colorAccent">@color/md_primary</item>
+        <item name="colorPrimaryDark">@color/md_primary</item>
+        <item name="colorControlNormal">@color/md_on_surface_variant</item>
+
+        <!-- Window -->
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:navigationBarColor">?attr/colorSurface</item>
+
+        <!-- Tabs -->
+        <item name="tabSelectedTextColor">?attr/colorPrimary</item>
+        <item name="tabTextColor">?attr/colorOnSurfaceVariant</item>
+
+        <!-- Widget overrides -->
         <item name="android:textViewStyle">@style/TextView</item>
         <item name="android:checkboxStyle">@style/CheckBox</item>
         <item name="android:listPopupWindowStyle">@style/ListPopupWindow</item>
@@ -16,22 +63,10 @@
         <item name="android:toolbarStyle">@style/Toolbar</item>
         <item name="toolbarStyle">@style/Toolbar</item>
         <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem</item>
-        <item name="android:navigationBarColor">#000000</item>
         <item name="android:radioButtonStyle">@style/RadioButton</item>
         <item name="radioButtonStyle">@style/RadioButton</item>
     </style>
     <style name="AppThemeLight" parent="@style/AppThemeBase">
-        <item name="colorAccent">#0288d1</item>
-        <item name="colorPrimary">#607d8b</item>
-        <item name="colorPrimaryDark">#455a64</item>
-        <item name="colorControlNormal">#e0e0e0</item>
-        <item name="colorPrimaryText">#424242</item>
-        <item name="colorSecondaryText">#757575</item>
-        <item name="colorPrimarySurface">#fafafa</item>
-        <item name="colorSecondarySurface">#ffffff</item>
-        <item name="colorPrimaryVariant">#607d8b</item>
-        <item name="colorSecondaryVariant">#d3dce0</item>
-        <item name="colorError">#ef5350</item>
         <item name="popupMenuBackground">@drawable/content_dialog_background_light</item>
         <item name="toolboxBackground">@drawable/toolbox_light</item>
         <item name="panelBackground">@drawable/panel_background_light</item>
@@ -39,17 +74,6 @@
         <item name="progressBarIndeterminateImage">@drawable/progress_bar_indeterminate_light</item>
     </style>
     <style name="AppThemeDark" parent="@style/AppThemeBase">
-        <item name="colorAccent">#0288d1</item>
-        <item name="colorPrimary">#505963</item>
-        <item name="colorPrimaryDark">#3f474f</item>
-        <item name="colorControlNormal">#616161</item>
-        <item name="colorPrimaryText">#fafafa</item>
-        <item name="colorSecondaryText">#9e9e9e</item>
-        <item name="colorPrimarySurface">#1b1e21</item>
-        <item name="colorSecondarySurface">#2d3238</item>
-        <item name="colorPrimaryVariant">#56677a</item>
-        <item name="colorSecondaryVariant">#37424f</item>
-        <item name="colorError">#ef5350</item>
         <item name="popupMenuBackground">@drawable/content_dialog_background_dark</item>
         <item name="toolboxBackground">@drawable/toolbox_dark</item>
         <item name="panelBackground">@drawable/panel_background_dark</item>
@@ -110,7 +134,7 @@
         <item name="android:popupBackground">?attr/popupMenuBackground</item>
         <item name="android:dropDownHorizontalOffset">-4dp</item>
     </style>
-    <style name="PopupMenu" parent="@android:style/Widget.PopupMenu">
+    <style name="PopupMenu" parent="@style/Widget.Material3.PopupMenu">
         <item name="android:popupBackground">?attr/popupMenuBackground</item>
     </style>
     <style name="ContentDialog" parent="@android:style/Theme.Dialog">
@@ -137,11 +161,11 @@
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?attr/colorPrimaryText</item>
     </style>
-    <style name="CheckBox" parent="@android:style/Widget.CompoundButton.CheckBox">
+    <style name="CheckBox" parent="@style/Widget.Material3.CompoundButton.CheckBox">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?attr/colorPrimaryText</item>
     </style>
-    <style name="RadioButton" parent="@android:style/Widget.CompoundButton.RadioButton">
+    <style name="RadioButton" parent="@style/Widget.Material3.CompoundButton.RadioButton">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?attr/colorPrimaryText</item>
         <item name="android:paddingRight">8dp</item>
@@ -149,11 +173,11 @@
     <style name="TitleTextAppearance" parent="android:TextAppearance">
         <item name="android:textSize">18sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?attr/colorPrimaryText</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
-    <style name="Toolbar" parent="@android:style/Widget.Toolbar">
+    <style name="Toolbar" parent="@style/Widget.Material3.Toolbar">
         <item name="android:background">?attr/colorPrimary</item>
-        <item name="titleTextColor">#ffffff</item>
+        <item name="titleTextColor">?attr/colorOnPrimary</item>
         <item name="titleTextAppearance">@style/TitleTextAppearance</item>
     </style>
     <style name="BaseButton">
@@ -286,14 +310,14 @@
     <style name="LeftSideButton">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">36dp</item>
-        <item name="tint">?attr/colorPrimaryVariant</item>
+        <item name="android:tint">?attr/colorPrimaryVariant</item>
         <item name="android:background">@drawable/left_side_button</item>
         <item name="android:padding">6dp</item>
     </style>
     <style name="RightSideButton">
         <item name="android:layout_width">40dp</item>
         <item name="android:layout_height">36dp</item>
-        <item name="tint">?attr/colorPrimaryVariant</item>
+        <item name="android:tint">?attr/colorPrimaryVariant</item>
         <item name="android:background">@drawable/right_side_button</item>
         <item name="android:padding">6dp</item>
     </style>

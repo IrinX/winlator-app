@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -378,6 +379,10 @@ public abstract class AppUtils {
     public static void setActivityTheme(Activity activity) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         int appTheme = preferences.getInt("app_theme", SettingsFragment.APP_THEME_DARK);
+        // Sync DayNight night mode with the user's theme choice so the Material3
+        // DayNight color tokens (values/values-night) resolve consistently.
+        AppCompatDelegate.setDefaultNightMode(appTheme == SettingsFragment.APP_THEME_LIGHT
+            ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
         if (appTheme == SettingsFragment.APP_THEME_LIGHT) {
             activity.setTheme(R.style.AppThemeLight);
         }
