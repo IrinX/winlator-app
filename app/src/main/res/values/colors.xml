@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material 3 Expressive color tokens (light). Dark variants in values-night/colors.xml -->
+    <!-- Material 3 Expressive color tokens (light) -->
     <color name="md_primary">#607d8b</color>
     <color name="md_on_primary">#ffffff</color>
     <color name="md_primary_container">#c5dbe5</color>
@@ -31,4 +31,34 @@
     <color name="md_surface_tint">#607d8b</color>
     <color name="md_shadow">#000000</color>
     <color name="md_scrim">#000000</color>
+
+    <!-- Material 3 Expressive color tokens (dark) -->
+    <color name="md_dark_primary">#a4cdd9</color>
+    <color name="md_dark_on_primary">#0a1f29</color>
+    <color name="md_dark_primary_container">#2d4250</color>
+    <color name="md_dark_on_primary_container">#c5dbe5</color>
+    <color name="md_dark_secondary">#7fd0ff</color>
+    <color name="md_dark_on_secondary">#00344d</color>
+    <color name="md_dark_secondary_container">#004c6e</color>
+    <color name="md_dark_on_secondary_container">#c4e5ff</color>
+    <color name="md_dark_tertiary">#bdc7dc</color>
+    <color name="md_dark_on_tertiary">#263041</color>
+    <color name="md_dark_tertiary_container">#3d4759</color>
+    <color name="md_dark_on_tertiary_container">#d9e3f8</color>
+    <color name="md_dark_error">#ffb4ab</color>
+    <color name="md_dark_on_error">#690005</color>
+    <color name="md_dark_error_container">#93000a</color>
+    <color name="md_dark_on_error_container">#ffdad6</color>
+    <color name="md_dark_background">#1a1c1e</color>
+    <color name="md_dark_on_background">#e2e2e5</color>
+    <color name="md_dark_surface">#1b1e21</color>
+    <color name="md_dark_on_surface">#e2e2e5</color>
+    <color name="md_dark_surface_variant">#42474e</color>
+    <color name="md_dark_on_surface_variant">#c3c7cf</color>
+    <color name="md_dark_outline">#8d9198</color>
+    <color name="md_dark_outline_variant">#42474e</color>
+    <color name="md_dark_inverse_surface">#e2e2e5</color>
+    <color name="md_dark_inverse_on_surface">#2f3033</color>
+    <color name="md_dark_inverse_primary">#607d8b</color>
+    <color name="md_dark_surface_tint">#a4cdd9</color>
 </resources>
